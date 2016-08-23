@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv)
 {
-	if(!SharedRes::init()) //Initialization of shared textures and fonts handler
+	if(!SharedRes::Get()->init()) //Initialization of shared textures and fonts handler
 		return 0;
 
 	Game game;

@@ -4,7 +4,7 @@
 
 PauseMenu::PauseMenu()
 {
-	font = SharedRes::getFont("segoesc.ttf");
+	font = SharedRes::Get()->getFont("segoesc.ttf");
 	pHeld = sf::Keyboard::isKeyPressed(sf::Keyboard::P);
 	returnButton = RoundMenuButton("menu/buttonPlaySmall.png", WINDOW_WIDTH/2-150, WINDOW_HEIGHT/2, 32);
 	restartButton = RoundMenuButton("menu/buttonRestartSmall.png", WINDOW_WIDTH/2-50, WINDOW_HEIGHT/2, 32);
@@ -14,7 +14,7 @@ PauseMenu::PauseMenu()
 
 PauseMenu::~PauseMenu()
 {
-	SharedRes::subtractFont(font);
+	SharedRes::Get()->subtractFont(font);
 }
 
 void PauseMenu::input(sf::Event& e)

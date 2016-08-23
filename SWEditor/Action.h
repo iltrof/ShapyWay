@@ -75,7 +75,7 @@ void undoAction(Action* action)
 	{
 	case ACTTYPE_CHANGEBLOCKS:
 	{
-		for(int i = 0; i<action->blockChange.positions.size(); i++)
+		for(unsigned int i = 0; i<action->blockChange.positions.size(); i++)
 		{
 			setBlock(action->blockChange.positions[i].x, action->blockChange.positions[i].y,
 					 action->blockChange.blocksBefore[i].ID, action->blockChange.blocksBefore[i].data);
@@ -109,7 +109,7 @@ void undoAction(Action* action)
 	} break;
 	case ACTTYPE_ADDLINK:
 	{
-		for(int i = 0; i<links.size(); i++)
+		for(unsigned int i = 0; i<links.size(); i++)
 		{
 			if(links[i].from.x == action->link.start.x && links[i].from.y == action->link.start.y
 			   && links[i].to.x == action->link.end.x && links[i].to.y == action->link.end.y)
@@ -125,7 +125,7 @@ void undoAction(Action* action)
 	} break;
 	case ACTTYPE_SWITCHLINK:
 	{
-		for(int i = 0; i<links.size(); i++)
+		for(unsigned int i = 0; i<links.size(); i++)
 		{
 			if(links[i].from.x == action->link.start.x && links[i].from.y == action->link.start.y
 			   && links[i].to.x == action->link.end.x && links[i].to.y == action->link.end.y)
@@ -148,7 +148,7 @@ void redoAction(Action* action)
 	{
 	case ACTTYPE_CHANGEBLOCKS:
 	{
-		for(int i = 0; i<action->blockChange.positions.size(); i++)
+		for(unsigned int i = 0; i<action->blockChange.positions.size(); i++)
 		{
 			setBlock(action->blockChange.positions[i].x, action->blockChange.positions[i].y,
 					 action->blockChange.blocksAfter[i].ID, action->blockChange.blocksAfter[i].data);
@@ -168,7 +168,7 @@ void redoAction(Action* action)
 	} break;
 	case ACTTYPE_REMOVELINK:
 	{
-		for(int i = 0; i<links.size(); i++)
+		for(unsigned int i = 0; i<links.size(); i++)
 		{
 			if(links[i].from.x == action->link.start.x && links[i].from.y == action->link.start.y
 			   && links[i].to.x == action->link.end.x && links[i].to.y == action->link.end.y)
@@ -180,7 +180,7 @@ void redoAction(Action* action)
 	} break;
 	case ACTTYPE_SWITCHLINK:
 	{
-		for(int i = 0; i<links.size(); i++)
+		for(unsigned int i = 0; i<links.size(); i++)
 		{
 			if(links[i].from.x == action->link.start.x && links[i].from.y == action->link.start.y
 			   && links[i].to.x == action->link.end.x && links[i].to.y == action->link.end.y)
@@ -205,7 +205,7 @@ void setBlock(int cellx, int celly, int newID, int data)
 
 	if(Util::isInterscreen(oldID) && !Util::isInterscreen(newID))
 	{
-		for(int i = 0; i<interscreenBlocks.size(); i++)
+		for(unsigned int i = 0; i<interscreenBlocks.size(); i++)
 		{
 			if(interscreenBlocks[i].x == cellx && interscreenBlocks[i].y == celly)
 			{
@@ -221,7 +221,7 @@ void setBlock(int cellx, int celly, int newID, int data)
 
 	if((Util::isPowering(oldID) && !Util::isPowering(newID)) || (Util::isSwitchable(oldID) && !Util::isSwitchable(newID)))
 	{
-		for(int i = 0; i<links.size(); i++)
+		for(unsigned int i = 0; i<links.size(); i++)
 		{
 			if((links[i].from.x == cellx && links[i].from.y == celly) || (links[i].to.x == cellx && links[i].to.y == celly))
 			{
@@ -251,13 +251,13 @@ void addScreen(int dir)
 		}
 	}
 
-	for(int i = 0; i<interscreenBlocks.size(); i++)
+	for(unsigned int i = 0; i<interscreenBlocks.size(); i++)
 	{
 		interscreenBlocks[i].x += xoff;
 		interscreenBlocks[i].y += yoff;
 	}
 
-	for(int i = 0; i<links.size(); i++)
+	for(unsigned int i = 0; i<links.size(); i++)
 	{
 		links[i].from.x += xoff; links[i].to.x += xoff;
 		links[i].from.y += yoff; links[i].to.y += yoff;
@@ -310,7 +310,7 @@ void removeScreen(int dir, Action* undo)
 	else 
 		delete[] cutBlocks;
 
-	for(int i = 0; i<interscreenBlocks.size(); i++)
+	for(unsigned int i = 0; i<interscreenBlocks.size(); i++)
 	{
 		auto isb = interscreenBlocks[i];
 		interscreenBlocks[i].x -= xoff;
@@ -325,7 +325,7 @@ void removeScreen(int dir, Action* undo)
 		}
 	}
 
-	for(int i = 0; i<links.size(); i++)
+	for(unsigned int i = 0; i<links.size(); i++)
 	{
 		Link oldLink = links[i];
 		links[i].from.x -= xoff; links[i].to.x -= xoff;

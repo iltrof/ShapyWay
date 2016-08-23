@@ -2,14 +2,25 @@
 #include <SFML\Audio.hpp>
 #include "SharedRes.h"
 
-static struct SoundSystem
+class SoundSystem
 {
-	static sf::Music* currentMusic;
+public:
+	~SoundSystem() { instance = nullptr; }
 
-	static void init();
-	static void playMusic(std::string name);
-	static void stopMusic();
-	static void setMusicVolume(int volume);
+	static SoundSystem* Get() 
+	{
+		if (instance == nullptr)
+			instance = new SoundSystem;
+		return instance;
+	}
+
+	sf::Music* currentMusic;
+
+	void init();
+	void playMusic(std::string name);
+	void stopMusic();
+	void setMusicVolume(int volume);
 private:
-	SoundSystem();
+	SoundSystem() {}
+	static SoundSystem* instance;
 };

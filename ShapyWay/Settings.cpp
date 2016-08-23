@@ -1,4 +1,3 @@
 #include "Settings.h"
 
-float Settings::musicVolume;
-float Settings::soundVolume;
+Settings* Settings::instance = nullptr;

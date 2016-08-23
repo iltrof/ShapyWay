@@ -45,12 +45,12 @@ void ColorSelector::input(sf::Event& e)
 void ColorSelector::render(sf::RenderTarget* target)
 {
 	sf::Sprite palette(*paletteTexture);
-	palette.setPosition(x, y);
+	palette.setPosition({ (float)x, (float)y });
 	target->draw(palette);
 
 	sf::RectangleShape selColor(sf::Vector2f(190, 14));
 	selColor.setOutlineThickness(1);
 	selColor.setFillColor(selectedColor);
-	selColor.setPosition(x, y+200);
+	selColor.setPosition({ (float)x, (float)y+200.f });
 	target->draw(selColor);
 }

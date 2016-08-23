@@ -22,22 +22,22 @@ SkinEditor::SkinEditor(std::string fileName)
 
 	for(int i = 0; i<=24; i++)
 	{
-		grid.push_back(sf::Vertex(sf::Vector2f(GRID_LEFT+CELL_SIZE*i, GRID_TOP), sf::Color(192, 192, 192, 64)));
-		grid.push_back(sf::Vertex(sf::Vector2f(GRID_LEFT+CELL_SIZE*i, GRID_TOP+CELL_SIZE*20), sf::Color(192, 192, 192, 64)));
+		grid.push_back(sf::Vertex(sf::Vector2f(GRID_LEFT+CELL_SIZE*(float)i, GRID_TOP), sf::Color(192, 192, 192, 64)));
+		grid.push_back(sf::Vertex(sf::Vector2f(GRID_LEFT+CELL_SIZE*(float)i, GRID_TOP+CELL_SIZE*20.f), sf::Color(192, 192, 192, 64)));
 	}
 	for(int j = 0; j<=20; j++)
 	{
-		grid.push_back(sf::Vertex(sf::Vector2f(GRID_LEFT, GRID_TOP+CELL_SIZE*j), sf::Color(192, 192, 192, 64)));
-		grid.push_back(sf::Vertex(sf::Vector2f(GRID_LEFT+CELL_SIZE*24, GRID_TOP+CELL_SIZE*j), sf::Color(192, 192, 192, 64)));
+		grid.push_back(sf::Vertex(sf::Vector2f(GRID_LEFT, GRID_TOP+CELL_SIZE*(float)j), sf::Color(192, 192, 192, 64)));
+		grid.push_back(sf::Vertex(sf::Vector2f(GRID_LEFT+CELL_SIZE*24.f, GRID_TOP+CELL_SIZE*(float)j), sf::Color(192, 192, 192, 64)));
 	}
 
 	colorPicker = new ColorPicker(680, 24, 256, 28);
 
 	colorPicker->SVColorShader.loadFromMemory(SVColorFragShader, sf::Shader::Fragment);
-	colorPicker->SVColorShader.setParameter("hueIndex", 0);
-	colorPicker->SVColorShader.setParameter("hueFactor", 0);
+	colorPicker->SVColorShader.setUniform("hueIndex", 0);
+	colorPicker->SVColorShader.setUniform("hueFactor", 0);
 	colorPicker->HColorShader.loadFromMemory(HColorFragShader, sf::Shader::Fragment);
-	SoundSystem::stopMusic();
+	SoundSystem::Get()->stopMusic();
 }
 
 SkinEditor::~SkinEditor()
@@ -65,7 +65,7 @@ void SkinEditor::render(sf::RenderTarget* target)
 	{
 		for(int j = 0; j<20; j++)
 		{
-			points.push_back(sf::Vertex(sf::Vector2f(i, j), pixels[j*24+i]));
+			points.push_back(sf::Vertex(sf::Vector2f((float)i, (float)j), pixels[j*24+i]));
 		}
 	}
 	miniature.draw(&points[0], points.size(), sf::Points);
@@ -88,15 +88,15 @@ SkinEditor::ColorPicker::ColorPicker() {}
 SkinEditor::ColorPicker::ColorPicker(int x, int y, int width, int hueHeight)
 	: x(x), y(y), width(width), hueHeight(hueHeight)
 {
-	svColorRect.push_back(sf::Vertex(sf::Vector2f(x, y), sf::Vector2f(0, 1)));
-	svColorRect.push_back(sf::Vertex(sf::Vector2f(x+width, y), sf::Vector2f(1, 1)));
-	svColorRect.push_back(sf::Vertex(sf::Vector2f(x+width, y+width), sf::Vector2f(1, 0)));
-	svColorRect.push_back(sf::Vertex(sf::Vector2f(x, y+width), sf::Vector2f(0, 0)));
+	svColorRect.push_back(sf::Vertex(sf::Vector2f((float)x, (float)y), sf::Vector2f(0, 1)));
+	svColorRect.push_back(sf::Vertex(sf::Vector2f((float)x+width, (float)y), sf::Vector2f(1, 1)));
+	svColorRect.push_back(sf::Vertex(sf::Vector2f((float)x+width, (float)y+width), sf::Vector2f(1, 0)));
+	svColorRect.push_back(sf::Vertex(sf::Vector2f((float)x, (float)y+width), sf::Vector2f(0, 0)));
 
-	hColorRect.push_back(sf::Vertex(sf::Vector2f(x, y+width+16), sf::Vector2f(0, 1)));
-	hColorRect.push_back(sf::Vertex(sf::Vector2f(x+width, y+width+16), sf::Vector2f(1, 1)));
-	hColorRect.push_back(sf::Vertex(sf::Vector2f(x+width, y+width+16+hueHeight), sf::Vector2f(1, 0)));
-	hColorRect.push_back(sf::Vertex(sf::Vector2f(x, y+width+16+hueHeight), sf::Vector2f(0, 0)));
+	hColorRect.push_back(sf::Vertex(sf::Vector2f((float)x, (float)y+width+16), sf::Vector2f(0, 1)));
+	hColorRect.push_back(sf::Vertex(sf::Vector2f((float)x+width, (float)y+width+16), sf::Vector2f(1, 1)));
+	hColorRect.push_back(sf::Vertex(sf::Vector2f((float)x+width, (float)y+width+16+hueHeight), sf::Vector2f(1, 0)));
+	hColorRect.push_back(sf::Vertex(sf::Vector2f((float)x, (float)y+width+16+hueHeight), sf::Vector2f(0, 0)));
 }
 
 void SkinEditor::ColorPicker::render(sf::RenderTarget* target)

@@ -12,7 +12,7 @@ struct TextField
 	
 	int minVal;
 	int maxVal;
-	int curPos;
+	unsigned int curPos;
 	bool active;
 	bool numOnly;
 	bool multiline;

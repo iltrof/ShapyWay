@@ -15,8 +15,8 @@ bool Button::input(sf::Event& e)
 
 void Button::render(sf::RenderWindow* window)
 {
-	sf::RectangleShape button(sf::Vector2f(sx, sy));
-	button.setPosition(x-1, y-1);
+	sf::RectangleShape button({ (float)sx, (float)sy });
+	button.setPosition({ x-1.f, y-1.f });
 	int mx = sf::Mouse::getPosition(*window).x, my = sf::Mouse::getPosition(*window).y;
 	if(mx >= x && mx < x+sx && my >= y && my < y+sy)
 		button.setFillColor(sf::Color(64, 64, 64));
@@ -26,6 +26,6 @@ void Button::render(sf::RenderWindow* window)
 	window->draw(button);
 
 	sf::Text labelText(label, *font, 16);
-	labelText.setPosition(x+sx/2 - labelText.getLocalBounds().width/2, y+2);
+	labelText.setPosition({ x+sx/2 - labelText.getLocalBounds().width/2, y+2.f });
 	window->draw(labelText);
 }

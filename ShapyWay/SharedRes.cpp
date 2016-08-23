@@ -6,10 +6,7 @@
 
 #define GetCurrentDir _getcwd
 
-std::map<std::string, std::pair<sf::Texture*, int>> SharedRes::textures;
-std::map<std::string, std::pair<sf::Font*, int>> SharedRes::fonts; 
-std::string SharedRes::programDirectory;
-sf::Shader SharedRes::blurShader;
+SharedRes* SharedRes::instance = nullptr;
 
 bool SharedRes::init()
 {

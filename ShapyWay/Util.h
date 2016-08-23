@@ -56,7 +56,7 @@ namespace SharedUtil
 
 	void handlePowerSwitch(Block* blocks, int cellx, int celly, int width, int height, bool powered, std::vector<Link>& links)
 	{
-		for(int i = 0; i<links.size(); i++)
+		for(unsigned int i = 0; i<links.size(); i++)
 		{
 			if(cellx == links[i].srcx && celly == links[i].srcy)
 			{
@@ -70,7 +70,7 @@ namespace SharedUtil
 
 				bool destPowerOn = ORlinks ? false : true;
 
-				for(int j = 0; j<links.size(); j++)
+				for(unsigned int j = 0; j<links.size(); j++)
 				{
 					if(links[i].destx == links[j].destx && links[i].desty == links[j].desty)
 					{
@@ -80,12 +80,12 @@ namespace SharedUtil
 						case TILEID_LEVER: case TILEID_BUTTON:
 							if(!ORlinks)
 							{
-								if(((bool)(srcBlock.data & 256)) == links[j].inv)
+								if(((srcBlock.data & 256) > 0) == links[j].inv)
 									destPowerOn = false;
 							}
 							else
 							{
-								if(((bool)(srcBlock.data & 256)) != links[j].inv)
+								if(((srcBlock.data & 256) > 0) != links[j].inv)
 									destPowerOn = true;
 							}
 							break;
@@ -115,7 +115,7 @@ namespace SharedUtil
 		{
 		case TILEID_LEVER:
 			curBlock.data ^= 256;
-			handlePowerSwitch(blocks, cellx, celly, width, height, curBlock.data & 256, links);
+			handlePowerSwitch(blocks, cellx, celly, width, height, (curBlock.data & 256) > 0, links);
 			break;
 		default: break;
 		}
@@ -136,7 +136,7 @@ namespace Physics
 			for(int j = 0; j<height*GRID_HEIGHT; j++)
 			{
 				if(blocks[j*width*GRID_WIDTH+i].ID == TILEID_LASER)
-					laserPositions.push_back(vec2(i, j));
+					laserPositions.push_back(vec2((float)i, (float)j));
 			}
 		}
 	}
@@ -154,8 +154,8 @@ namespace Physics
 		if(actor->xspeed < 0) actor->state |= ACTSTATE_LOOKING_LEFT;
 		else if(actor->xspeed > 0 && actor->state & ACTSTATE_LOOKING_LEFT) actor->state ^= ACTSTATE_LOOKING_LEFT;
 
-		int startx = MIN(actor->x/24, oldX/24) - 3, starty = MIN(actor->y/24, oldY/24) - 3;
-		int endx = MAX(actor->x/24, oldX/24) + 3, endy = MAX(actor->y/24, oldY/24) + 3;
+		int startx = (int)MIN(actor->x/24, oldX/24) - 3, starty = (int)MIN(actor->y/24, oldY/24) - 3;
+		int endx = (int)MAX(actor->x/24, oldX/24) + 3, endy = (int)MAX(actor->y/24, oldY/24) + 3;
 
 		sf::FloatRect actorRect(actor->x+actor->collisionRect.left, actor->y+actor->collisionRect.top, actor->collisionRect.width, actor->collisionRect.height);
 		for(int i = startx; i<=endx; i++)
@@ -164,13 +164,13 @@ namespace Physics
 			{
 				sf::FloatRect blockRect;
 				if(SharedUtil::getBlockID(blocks, i, j, width, height) == TILEID_GRASS)
-					blockRect = sf::FloatRect(i*24, j*24, 24, 24);
+					blockRect = sf::FloatRect(i*24.f, j*24.f, 24, 24);
 				if(blockRect.width == 0 || blockRect.height == 0) continue;
 
 				if(rectRectIntersect(actorRect, blockRect))
 				{
-					if(oldX < i*24+12) actor->x = i*24-8;
-					else if(oldX > i*24+12) actor->x = i*24+24+8;
+					if(oldX < i*24.f+12.f) actor->x = i*24.f-8.f;
+					else if(oldX > i*24.f+12.f) actor->x = i*24.f+24.f+8.f;
 				}
 			}
 		}
@@ -200,9 +200,9 @@ namespace Physics
 				sf::FloatRect blockRect;
 				int blockID = SharedUtil::getBlockID(blocks, i, j, width, height);
 				if(blockID == TILEID_GRASS || blockID == TILEID_WATER || blockID == TILEID_LAVA || blockID == TILEID_ACID)
-					blockRect = sf::FloatRect(i*24, j*24, 24, 24);
+					blockRect = sf::FloatRect(i*24.f, j*24.f, 24.f, 24.f);
 				else if(blockID == TILEID_CHECKPOINT)
-					blockRect = sf::FloatRect(i*24+5, j*24, 14, 24);
+					blockRect = sf::FloatRect(i*24.f+5.f, j*24.f, 14.f, 24.f);
 				if(blockRect.width == 0 || blockRect.height == 0) continue;
 
 				bool buttonPower = false;
@@ -218,11 +218,11 @@ namespace Physics
 								buttonPower = true;
 							}
 
-							actor->y = j*24;
+							actor->y = j*24.f;
 							actor->state |= ACTSTATE_CAN_JUMP;
 							jumpCompensation = 2;
 						}
-						else if(oldY > j*24+12) actor->y = j*24+24+16;
+						else if(oldY > j*24.f+12.f) actor->y = j*24.f+24.f+16.f;
 						actor->yspeed = 0;
 					}
 					else if(blockID == TILEID_CHECKPOINT)
@@ -253,7 +253,7 @@ namespace Physics
 
 				if(SharedUtil::getBlockID(blocks, i, j-1, width, height) == TILEID_BUTTON)
 				{
-					if(((bool)(blocks[(j-1)*width*GRID_WIDTH+i].data & 256)) != buttonPower)
+					if(((blocks[(j-1)*width*GRID_WIDTH+i].data & 256) > 0) != buttonPower)
 					{
 						blocks[(j-1)*width*GRID_WIDTH+i].data ^= 256;
 						SharedUtil::handlePowerSwitch(blocks, i, j-1, width, height, buttonPower, links);
@@ -268,18 +268,18 @@ namespace Physics
 			{
 				if(actor->yspeed <= 1) actor->yspeed = 0;
 				actor->yspeed -= gravity/2.f;
-				actor->yspeed /= 1.6;
+				actor->yspeed /= 1.6f;
 			}
 			else if(actor->yspeed < -4)
 			{
-				actor->yspeed /= 1.2;
+				actor->yspeed /= 1.2f;
 				if(actor->yspeed > -0.5) actor->yspeed = 0;
 			}
 		}
 
 		for(vec2 pos : laserPositions)
 		{
-			Block* laser = SharedUtil::getBlock(blocks, pos.x, pos.y, width, height);
+			Block* laser = SharedUtil::getBlock(blocks, (int)pos.x, (int)pos.y, width, height);
 			if(laser->data & 4)
 			{
 				if(pos.x*24+8 < actorRect.left+actorRect.width && pos.x*24+16 > actorRect.left)
@@ -287,9 +287,9 @@ namespace Physics
 					if((laser->data & 3) == 0 && actorRect.top+actorRect.height <= pos.y*24+24)
 					{
 						int obstructionY = -1;
-						for(int i = pos.y; i>=0; i--)
+						for(int i = (int)pos.y; i>=0; i--)
 						{
-							if(SharedUtil::getBlockID(blocks, pos.x, i, width, height) == TILEID_GRASS)
+							if(SharedUtil::getBlockID(blocks, (int)pos.x, i, width, height) == TILEID_GRASS)
 							{
 								obstructionY = i*24+24;
 								break;
@@ -301,9 +301,9 @@ namespace Physics
 					else if((laser->data & 3) == 2 && actorRect.top >= pos.y*24)
 					{
 						int obstructionY = -1;
-						for(int i = pos.y; i<height*GRID_HEIGHT; i++)
+						for(int i = (int)pos.y; i<height*GRID_HEIGHT; i++)
 						{
-							if(SharedUtil::getBlockID(blocks, pos.x, i, width, height) == TILEID_GRASS)
+							if(SharedUtil::getBlockID(blocks, (int)pos.x, i, width, height) == TILEID_GRASS)
 							{
 								obstructionY = i*24;
 								break;
@@ -318,9 +318,9 @@ namespace Physics
 					if((laser->data & 3) == 1 && actorRect.left >= pos.x*24)
 					{
 						int obstructionX = -1;
-						for(int i = pos.x; i<width*GRID_WIDTH; i++)
+						for(int i = (int)pos.x; i<width*GRID_WIDTH; i++)
 						{
-							if(SharedUtil::getBlockID(blocks, i, pos.y, width, height) == TILEID_GRASS)
+							if(SharedUtil::getBlockID(blocks, i, (int)pos.y, width, height) == TILEID_GRASS)
 							{
 								obstructionX = i*24;
 								break;
@@ -332,9 +332,9 @@ namespace Physics
 					else if((laser->data & 3) == 3 && actorRect.left+actorRect.width <= pos.x*24+24)
 					{
 						int obstructionX = -1;
-						for(int i = pos.x; i>=0; i--)
+						for(int i = (int)pos.x; i>=0; i--)
 						{
-							if(SharedUtil::getBlockID(blocks, i, pos.y, width, height) == TILEID_GRASS)
+							if(SharedUtil::getBlockID(blocks, i, (int)pos.y, width, height) == TILEID_GRASS)
 							{
 								obstructionX = i*24+24;
 								break;
@@ -462,9 +462,9 @@ namespace BlockRenderer
 		for(int j=0; j<sn; j++)
 		{
 			double rads=j*(360/sn); rads=rads/180*3.14159265359;
-			vec2 p1 = vec2(radius*sin(rads)+lightx, radius*cos(rads)+lighty);
+			vec2 p1 = vec2(radius*sinf((float)rads)+lightx, radius*cosf((float)rads)+lighty);
 			double rads2=(j+1)*(360/sn); rads2=rads2/180*3.14159265359;
-			vec2 p2 = vec2(radius*sin(rads2)+lightx, radius*cos(rads2)+lighty);
+			vec2 p2 = vec2(radius*sinf((float)rads2)+lightx, radius*cosf((float)rads2)+lighty);
 		
 			lines.push_back(std::pair<vec2, vec2>(p1, p2));
 			points.push_back(p1);
@@ -472,31 +472,31 @@ namespace BlockRenderer
 		
 		{
 			std::vector<vec2> rays;
-			for(int i = (lightx - radius)/24; i < (lightx + radius)/24; i++)
+			for(int i = int((lightx - radius)/24.f); i < int((lightx + radius)/24.f); i++)
 			{
-				for(int j = (lighty - radius)/24; j < (lighty + radius)/24; j++)
+				for(int j = int((lighty - radius)/24.f); j < int((lighty + radius)/24.f); j++)
 				{
 					if(isSolid(SharedUtil::getBlockID(blocks, i, j, width, height)))
 					{
 						if(!isSolid(SharedUtil::getBlockID(blocks, i, j-1, width, height)) && lighty <= j*24)
-							lines.push_back(std::pair<vec2, vec2>(vec2(i*24, j*24), vec2(i*24+24, j*24)));
+							lines.push_back(std::pair<vec2, vec2>(vec2(i*24.f, j*24.f), vec2(i*24.f+24.f, j*24.f)));
 						if(!isSolid(SharedUtil::getBlockID(blocks, i+1, j, width, height)) && lightx >= i*24+24)
-							lines.push_back(std::pair<vec2, vec2>(vec2(i*24+24, j*24), vec2(i*24+24, j*24+24)));
+							lines.push_back(std::pair<vec2, vec2>(vec2(i*24.f+24.f, j*24.f), vec2(i*24.f+24.f, j*24.f+24.f)));
 						if(!isSolid(SharedUtil::getBlockID(blocks, i, j+1, width, height)) && lighty >= j*24+24)
-							lines.push_back(std::pair<vec2, vec2>(vec2(i*24+24, j*24+24), vec2(i*24, j*24+24)));
+							lines.push_back(std::pair<vec2, vec2>(vec2(i*24.f+24.f, j*24.f+24.f), vec2(i*24.f, j*24.f+24.f)));
 						if(!isSolid(SharedUtil::getBlockID(blocks, i-1, j, width, height)) && lightx <= i*24)
-							lines.push_back(std::pair<vec2, vec2>(vec2(i*24, j*24+24), vec2(i*24, j*24)));
+							lines.push_back(std::pair<vec2, vec2>(vec2(i*24.f, j*24.f+24.f), vec2(i*24.f, j*24.f)));
 
 						auto con = getSolidConnect(blocks, i, j, width, height);
-						if(!con[0]&&!con[2]) { points.push_back(vec2(i*24+24, j*24)); rays.push_back(vec2(i*24+24, j*24-0.5)); rays.push_back(vec2(i*24+24+0.5, j*24)); }
-						if(!con[2]&&!con[4]) { points.push_back(vec2(i*24+24, j*24+24)); rays.push_back(vec2(i*24+24, j*24+24+0.5)); rays.push_back(vec2(i*24+24+0.5, j*24+24)); }
-						if(!con[4]&&!con[6]) { points.push_back(vec2(i*24, j*24+24)); rays.push_back(vec2(i*24, j*24+24+0.5)); rays.push_back(vec2(i*24-0.5, j*24+24)); }
-						if(!con[6]&&!con[0]) { points.push_back(vec2(i*24, j*24)); rays.push_back(vec2(i*24, j*24-0.5)); rays.push_back(vec2(i*24-0.5, j*24)); }
+						if(!con[0]&&!con[2]) { points.push_back(vec2(i*24.f+24.f, j*24.f)); rays.push_back(vec2(i*24.f+24.f, j*24.f-0.5f)); rays.push_back(vec2(i*24.f+24.f+0.5f, j*24.f)); }
+						if(!con[2]&&!con[4]) { points.push_back(vec2(i*24.f+24.f, j*24.f+24.f)); rays.push_back(vec2(i*24.f+24.f, j*24.f+24.f+0.5f)); rays.push_back(vec2(i*24.f+24.f+0.5f, j*24.f+24.f)); }
+						if(!con[4]&&!con[6]) { points.push_back(vec2(i*24.f, j*24.f+24.f)); rays.push_back(vec2(i*24.f, j*24.f+24.f+0.5f)); rays.push_back(vec2(i*24.f-0.5f, j*24.f+24.f)); }
+						if(!con[6]&&!con[0]) { points.push_back(vec2(i*24.f, j*24.f)); rays.push_back(vec2(i*24.f, j*24.f-0.5f)); rays.push_back(vec2(i*24.f-0.5f, j*24.f)); }
 
-						if(con[0]&&con[2]&&!con[1]) points.push_back(vec2(i*24+24, j*24));
-						if(con[2]&&con[4]&&!con[3]) points.push_back(vec2(i*24+24, j*24+24));
-						if(con[4]&&con[6]&&!con[5]) points.push_back(vec2(i*24, j*24+24));
-						if(con[6]&&con[0]&&!con[7]) points.push_back(vec2(i*24, j*24));
+						if(con[0]&&con[2]&&!con[1]) points.push_back(vec2(i*24.f+24.f, j*24.f));
+						if(con[2]&&con[4]&&!con[3]) points.push_back(vec2(i*24.f+24.f, j*24.f+24.f));
+						if(con[4]&&con[6]&&!con[5]) points.push_back(vec2(i*24.f, j*24.f+24.f));
+						if(con[6]&&con[0]&&!con[7]) points.push_back(vec2(i*24.f, j*24.f));
 					}
 				}
 			}
@@ -519,20 +519,20 @@ namespace BlockRenderer
 
 			for(vec2& ray : rays)
 			{
-				if((vec2(lightx, lighty)-ray).magsqr() < radius*radius+0.1)
-					points.push_back(vec2(lightx, lighty) + (ray-vec2(lightx, lighty)).normalized() * radius);
+				if((vec2((float)lightx, (float)lighty)-ray).magsqr() < radius*radius+0.1)
+					points.push_back(vec2((float)lightx, (float)lighty) + (ray-vec2((float)lightx, (float)lighty)).normalized() * radius);
 			}
 		}
 
-		for(int i = 0; i<points.size(); i++)
+		for(unsigned int i = 0; i<points.size(); i++)
 		{
-			if((vec2(lightx, lighty)-points[i]).magsqr() > radius*radius+0.1)
+			if((vec2((float)lightx, (float)lighty)-points[i]).magsqr() > radius*radius+0.1)
 			{
 				points.erase(points.begin()+i); i--;
 			}
 		}
 
-		for(int i = sn; i < lines.size(); i++)
+		for(unsigned int i = sn; i < lines.size(); i++)
 		{
 			for(int j = 0; j<sn; j++)
 			{
@@ -545,25 +545,25 @@ namespace BlockRenderer
 
 		for(vec2& point : points)
 		{
-			double minT = 1., tempT;
+			double minT = 1.f, tempT;
 			for(auto& line : lines)
 			{
-				if(SharedUtil::segSegIntersection(vec2(lightx, lighty), point-vec2(lightx, lighty), line.first, line.second-line.first, NULL, &tempT))
+				if(SharedUtil::segSegIntersection(vec2((float)lightx, (float)lighty), point-vec2((float)lightx, (float)lighty), line.first, line.second-line.first, NULL, &tempT))
 				{
 					if(tempT < minT) minT = tempT;
 				}
 			}
-			point = (point-vec2(lightx, lighty))*minT;
+			point = (point-vec2((float)lightx, (float)lighty))*(float)minT;
 		}
 
 		std::sort(points.begin(), points.end(), SharedUtil::compareAngles);
 		
 		std::vector<sf::Vertex> result;
-		result.push_back(sf::Vertex(sf::Vector2f(x, y), sf::Color(color.r, color.g, color.b, 128)));
-		for(int j = 0; j<=points.size(); j++)
+		result.push_back(sf::Vertex(sf::Vector2f((float)x, (float)y), sf::Color(color.r, color.g, color.b, 128)));
+		for(unsigned int j = 0; j<=points.size(); j++)
 		{
 			vec2 pt = points[j%points.size()];
-			int alpha = (1-pt.mag()/(radius))*128;
+			int alpha = int((1-pt.mag()/(radius))*128);
 			result.push_back(sf::Vertex(sf::Vector2f(x+pt.x, y+pt.y), sf::Color(color.r, color.g, color.b, alpha)));
 		}
 		
@@ -579,13 +579,13 @@ namespace BlockRenderer
 			break;
 		case TILEID_GRASS: {
 			sf::Sprite spr(*texture); spr.setTextureRect(getTexRect(getConnect(blocks, cellx, celly, width, height)));
-			spr.setOrigin(4, 4); spr.setPosition(x, y);
+			spr.setOrigin(4, 4); spr.setPosition((float)x, (float)y);
 			target->draw(spr);
 		} break;
 		case TILEID_LASER: { //........ .....POO; O: orientation; P: power;
-			if((curBlock.data & 3 == 0 || curBlock.data & 3 == 2)&&(x < -24 || x > WINDOW_WIDTH+24))
+			if(((curBlock.data & 3) == 0 || (curBlock.data & 3) == 2)&&(x < -24 || x > WINDOW_WIDTH+24))
 				break;
-			if((curBlock.data & 3 == 1 || curBlock.data & 3 == 3)&&(y < -24 || y > WINDOW_HEIGHT+24))
+			if(((curBlock.data & 3) == 1 || (curBlock.data & 3) == 3)&&(y < -24 || y > WINDOW_HEIGHT+24))
 				break;
 
 			sf::Sprite spr(*texture);
@@ -606,22 +606,22 @@ namespace BlockRenderer
 			{
 				for(int curcx = cellx, curcy = celly; !isSolid(SharedUtil::getBlockID(blocks, curcx, curcy, width, height)); curcx += xinc, curcy += yinc)
 				{
-					spr.setPosition(x+12+24*(curcx-cellx), y+12+24*(curcy-celly));
+					spr.setPosition(x+12.f+24.f*(curcx-cellx), y+12.f+24.f*(curcy-celly));
 					target->draw(spr);
 				}
 			}
 
 			if(curBlock.data & 4) spr.setTextureRect(sf::IntRect(32, 0, 32, 32));
 			else spr.setTextureRect(sf::IntRect(0, 0, 32, 32));
-			spr.setPosition(x+12, y+12);
+			spr.setPosition(x+12.f, y+12.f);
 
 			target->draw(spr);
 		} break;
 		case TILEID_LEVER: { //.......P CCCCCCCC; C: color; P: power;
-			sf::Sprite spr(*texture); spr.setOrigin(16, 16); spr.setPosition(x+12, y+12);
+			sf::Sprite spr(*texture); spr.setOrigin(16, 16); spr.setPosition(x+12.f, y+12.f);
 			spr.setTextureRect(sf::IntRect(0, 0, 32, 32));
 
-			spr.setScale(curBlock.data & 256 ? -1 : 1, 1);
+			spr.setScale(curBlock.data & 256 ? -1.f : 1.f, 1.f);
 			target->draw(spr);
 			spr.setTextureRect(sf::IntRect(curBlock.data & 256 ? 64 : 32, 0, 32, 32));
 			spr.setColor(from8bit(curBlock.data & 255));
@@ -651,12 +651,12 @@ namespace BlockRenderer
 				}
 			}
 
-			sf::Sprite spr(*texture); spr.setOrigin(4, 4); spr.setPosition(x, y);
+			sf::Sprite spr(*texture); spr.setOrigin(4, 4); spr.setPosition((float)x, (float)y);
 			spr.setTextureRect(sf::IntRect(top ? 0 : 32, 0, 32, 32));
 			target->draw(spr);
 		} break;
 		case TILEID_BUTTON: { //.......P CCCCCCCC; C: color; P: power;
-			sf::Sprite spr(*texture); spr.setOrigin(16, 16); spr.setPosition(x+12, y+12);
+			sf::Sprite spr(*texture); spr.setOrigin(16, 16); spr.setPosition(x+12.f, y+12.f);
 			spr.setTextureRect(sf::IntRect(0, 0, 32, 32));
 			target->draw(spr);
 			spr.setTextureRect(sf::IntRect(curBlock.data & 256 ? 64 : 32, 0, 32, 32));
@@ -664,11 +664,11 @@ namespace BlockRenderer
 			target->draw(spr);
 		} break;
 		case TILEID_PORTAL: { //........ CCCCCCCC; C: color;
-			sf::Sprite spr(*texture); spr.setPosition(x-4, y-4);
+			sf::Sprite spr(*texture); spr.setPosition(x-4.f, y-4.f);
 			target->draw(spr);
 		} break;
 		case TILEID_LIGHT: { //.POORRRR CCCCCCCC; C: color; R: light radius; O: orientation; P: power;
-			sf::Sprite spr(*texture); spr.setOrigin(16, 16); spr.setPosition(x+12, y+12);
+			sf::Sprite spr(*texture); spr.setOrigin(16, 16); spr.setPosition(x+12.f, y+12.f);
 			int xoff = 12, yoff = 12, radius = ((curBlock.data & 15360)>>10)*24;
 			if(x < -24-radius || x > WINDOW_WIDTH+24+radius || y < -24-radius || y > WINDOW_HEIGHT+24+radius)
 				break;
@@ -682,16 +682,16 @@ namespace BlockRenderer
 			}
 			target->draw(spr);
 			if(curBlock.data & 16384) //power
-				renderLight(blocks, width, height, cellx*24+xoff, celly*24+yoff, x+xoff, y+yoff, from8bit(curBlock.data & 255), radius, target);
+				renderLight(blocks, width, height, cellx*24+xoff, celly*24+yoff, x+xoff, y+yoff, from8bit(curBlock.data & 255), (float)radius, target);
 		} break;
 		case TILEID_CHECKPOINT: { //........ .......R; R: raised;
-			sf::Sprite spr(*texture); spr.setPosition(x-4, y-4);
+			sf::Sprite spr(*texture); spr.setPosition(x-4.f, y-4.f);
 			spr.setTextureRect(sf::IntRect(0, 0, 32, 32));
 			target->draw(spr);
 			spr.setTextureRect(sf::IntRect(32, 0, 32, 32));
 			spr.setColor(from8bit(curBlock.data & 255));
 			if(!(curBlock.data & 256))
-				spr.setPosition(x-4, y+6);
+				spr.setPosition(x-4.f, y+6.f);
 			target->draw(spr);
 		}
 		default:

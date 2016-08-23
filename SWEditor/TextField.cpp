@@ -8,8 +8,8 @@ TextField::TextField()
 
 TextField::TextField(int x, int y, int width, int height, sf::Font* font, bool numOnly, bool multiline)
 {
-	field.setPosition(x, y);
-	field.setSize(sf::Vector2f(width, height));
+	field.setPosition({ (float)x, (float)y });
+	field.setSize({ (float)width, (float)height });
 	field.setOutlineColor(sf::Color::White);
 	field.setOutlineThickness(1);
 
@@ -34,18 +34,18 @@ void TextField::input(sf::Event& e)
 		{
 			if(excludedChars.find_first_of(e.text.unicode) == excludedChars.npos)
 			{
-				text = text.substr(0, curPos)+(char)e.text.unicode+text.substr(std::min(curPos, (int)text.length()));
+				text = text.substr(0, curPos)+(char)e.text.unicode+text.substr(std::min((int)curPos, (int)text.length()));
 				curPos++;
 			}
 		}
 		if(e.text.unicode==8)
 		{
-			text = text.substr(0, std::max(curPos-1, 0))+text.substr(curPos);
+			text = text.substr(0, std::max((int)curPos-1, 0))+text.substr(curPos);
 			curPos -= (curPos==0) ? 0 : 1;
 		}
 		else if(e.text.unicode==13 && multiline)
 		{
-			text = text.substr(0, curPos)+"\n"+text.substr(std::min(curPos, (int)text.length()));
+			text = text.substr(0, curPos)+"\n"+text.substr(std::min((int)curPos, (int)text.length()));
 			curPos++;
 		}
 		cursorClock.restart();
@@ -54,7 +54,7 @@ void TextField::input(sf::Event& e)
 	{
 		if(e.key.code == sf::Keyboard::Delete)
 		{
-			text = text.substr(0, curPos)+text.substr(std::min(curPos+1, (int)text.length()));
+			text = text.substr(0, curPos)+text.substr(std::min((int)curPos+1, (int)text.length()));
 		}
 		else if(e.key.code == sf::Keyboard::Left)
 		{
@@ -76,7 +76,7 @@ void TextField::input(sf::Event& e)
 		else if(e.key.code == sf::Keyboard::Down && multiline && text.find("\n", curPos)!=text.npos)
 		{
 			int nls; nls = text.find("\n", curPos); int tcl; if(text.rfind("\n", curPos-1)!=text.npos&&curPos!=0) tcl = curPos-text.rfind("\n", curPos-1); else tcl = curPos+1;
-			int nCurPos = nls+tcl;
+			unsigned int nCurPos = nls+tcl;
 			if(nCurPos>text.length()) nCurPos = text.length();
 			if(text.find("\n", curPos)!=text.rfind("\n", nCurPos-1))
 				nCurPos = text.rfind("\n", nCurPos-1);
@@ -96,20 +96,20 @@ void TextField::input(sf::Event& e)
 	}
 	else if(e.type == sf::Event::MouseButtonPressed)
 	{
-		int x = field.getPosition().x, y = field.getPosition().y, sx = field.getSize().x, sy = field.getSize().y;
+		int x = (int)field.getPosition().x, y = (int)field.getPosition().y, sx = (int)field.getSize().x, sy = (int)field.getSize().y;
 		if(e.mouseButton.x >= x && e.mouseButton.x < x+sx && e.mouseButton.y >= y && e.mouseButton.y < y+sy)
 		{
 			curPos = text.length();
 			int curDist, prevDist;
-			for(int i = 0; i<text.length(); i++)
+			for(unsigned int i = 0; i<text.length(); i++)
 			{
 				sf::Text testText1(text.substr(0, i), *font, 14);
-				testText1.setPosition(x+3, y+3);
+				testText1.setPosition({ x+3.f, y+3.f });
 				sf::Text testText2(text.substr(0, i+1), *font, 14);
-				testText2.setPosition(x+3, y+3);
+				testText2.setPosition({ x+3.f, y+3.f });
 
-				curDist = abs(e.mouseButton.x - testText2.getGlobalBounds().left - testText2.getLocalBounds().width);
-				prevDist = abs(e.mouseButton.x - testText1.getGlobalBounds().left - testText1.getLocalBounds().width);
+				curDist = (int)abs(e.mouseButton.x - testText2.getGlobalBounds().left - testText2.getLocalBounds().width);
+				prevDist = (int)abs(e.mouseButton.x - testText1.getGlobalBounds().left - testText1.getLocalBounds().width);
 
 				if(prevDist < curDist)
 				{
@@ -136,7 +136,7 @@ void TextField::input(sf::Event& e)
 	}
 	else if(e.type == sf::Event::MouseWheelMoved && active && numOnly)
 	{
-		int x = field.getPosition().x, y = field.getPosition().y, sx = field.getSize().x, sy = field.getSize().y;
+		int x = (int)field.getPosition().x, y = (int)field.getPosition().y, sx = (int)field.getSize().x, sy = (int)field.getSize().y;
 		if(e.mouseWheel.x >= x && e.mouseWheel.x < x+sx && e.mouseWheel.y >= y && e.mouseWheel.y < y+sy)
 		{
 			int num = 0;
@@ -159,7 +159,7 @@ void TextField::render(sf::RenderTarget* target)
 	field.setFillColor(sf::Color(16+16*active, 16+16*active, 16+16*active));
 	target->draw(field);
 	sf::Text txt(text, *font, 14);
-	txt.setColor(sf::Color::White);
+	txt.setFillColor(sf::Color::White);
 	txt.setPosition(field.getPosition()+sf::Vector2f(3, 3));
 	target->draw(txt);
 
@@ -175,15 +175,15 @@ void TextField::render(sf::RenderTarget* target)
 	{
 		if(tmpstr[i]=='\n') linebreaks++;
 	}
-	int cursorY = 3+linebreaks*16+txt.getPosition().y;
+	int cursorY = 3+linebreaks*16+(int)txt.getPosition().y;
 
 	if(linebreaks>0)
 		tmptxt.setString(tmpstr.substr(std::min(tmpstr.length()-1, tmpstr.rfind("\n")+1)));
 	else
 		tmptxt.setString(tmpstr);
-	int cursorX = tmptxt.getLocalBounds().width + txt.getPosition().x;
+	int cursorX = int(tmptxt.getLocalBounds().width + txt.getPosition().x);
 
-	cursor.setPosition(cursorX, cursorY);
+	cursor.setPosition({ (float)cursorX, (float)cursorY });
 	if(active) target->draw(cursor);
 }
 

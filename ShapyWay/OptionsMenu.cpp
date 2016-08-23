@@ -5,15 +5,15 @@
 
 OptionsMenu::OptionsMenu()
 {
-	musicSlider = Slider(500, 164, 0, 100, &Settings::musicVolume);
-	soundSlider = Slider(500, 196, 0, 100, &Settings::soundVolume);
+	musicSlider = Slider(500, 164, 0, 100, &Settings::Get()->musicVolume);
+	soundSlider = Slider(500, 196, 0, 100, &Settings::Get()->soundVolume);
 
-	font = SharedRes::getFont("segoesc.ttf");
+	font = SharedRes::Get()->getFont("segoesc.ttf");
 }
 
 OptionsMenu::~OptionsMenu()
 {
-	SharedRes::subtractFont(font);
+	SharedRes::Get()->subtractFont(font);
 }
 
 void OptionsMenu::update(sf::Vector2i mousePos)

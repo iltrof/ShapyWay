@@ -36,22 +36,22 @@ void FourWaySelector::render(sf::RenderTarget* target)
 	button.setOutlineThickness(1);
 
 	button.setFillColor(sf::Color(16+(value==0)*64, 16+(value==0)*64, 16+(value==0)*64));
-	button.setPosition(x-12, y); //up
+	button.setPosition({ (float)x-12.f, (float)y }); //up
 	target->draw(button);
 
 	button.setFillColor(sf::Color(16+(value==1)*64, 16+(value==1)*64, 16+(value==1)*64));
-	button.setPosition(x+14, y+13); //right
+	button.setPosition({ x+14.f, y+13.f }); //right
 	target->draw(button);
 
 	button.setFillColor(sf::Color(16+(value==2)*64, 16+(value==2)*64, 16+(value==2)*64));
-	button.setPosition(x-12, y+26); //down
+	button.setPosition({ x-12.f, y+26.f }); //down
 	target->draw(button);
 
 	button.setFillColor(sf::Color(16+(value==3)*64, 16+(value==3)*64, 16+(value==3)*64));
-	button.setPosition(x-38, y+13); //left
+	button.setPosition({ x-38.f, y+13.f }); //left
 	target->draw(button);
 
 	sf::Text txt(label, *font, 16);
-	txt.setPosition(x-64-txt.getLocalBounds().width, y+13);
+	txt.setPosition({ x-64-txt.getLocalBounds().width, y+13.f });
 	target->draw(txt);
 }

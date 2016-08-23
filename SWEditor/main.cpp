@@ -157,7 +157,7 @@ void saveMap(std::string name)
 
 	file << std::endl;
 	file << links.size() << std::endl;
-	for(int i = 0; i<links.size(); i++)
+	for(unsigned int i = 0; i<links.size(); i++)
 		file << links[i].from.x << " " << links[i].from.y << " " << links[i].to.x << " " << links[i].to.y << " " << links[i].onPowerOn << std::endl;
 
 	file.close();
@@ -219,7 +219,7 @@ void addUndo(Action* undo)
 		delete undos.front();
 		undos.erase(undos.begin());
 	}
-	for(int i = 0; i<redos.size(); i++)
+	for(unsigned int i = 0; i<redos.size(); i++)
 		delete redos[i];
 	redos.clear();
 }
@@ -280,13 +280,13 @@ int main(int argc, char** argv)
 	std::vector<sf::Vertex> grid((GRID_WIDTH+1)*2+(GRID_HEIGHT+1)*2);
 	for(int i = 0; i<=GRID_WIDTH; i++)
 	{
-		grid.push_back(sf::Vertex(sf::Vector2f(i*24, 0), sf::Color(255, 255, 255, 64)));
-		grid.push_back(sf::Vertex(sf::Vector2f(i*24, WINDOW_HEIGHT), sf::Color(255, 255, 255, 64)));
+		grid.push_back(sf::Vertex({ i*24.f, 0.f }, sf::Color(255, 255, 255, 64)));
+		grid.push_back(sf::Vertex({ i*24.f, WINDOW_HEIGHT }, sf::Color(255, 255, 255, 64)));
 	}
 	for(int i = 0; i<=GRID_HEIGHT; i++)
 	{
-		grid.push_back(sf::Vertex(sf::Vector2f(0, i*24), sf::Color(255, 255, 255, 64)));
-		grid.push_back(sf::Vertex(sf::Vector2f(WINDOW_WIDTH, i*24), sf::Color(255, 255, 255, 64)));
+		grid.push_back(sf::Vertex({ 0.f, i*24.f }, sf::Color(255, 255, 255, 64)));
+		grid.push_back(sf::Vertex({ WINDOW_WIDTH, i*24.f }, sf::Color(255, 255, 255, 64)));
 	}
 
 	while(window.isOpen())
@@ -451,9 +451,9 @@ int main(int argc, char** argv)
 						selectedLink = -1; linkStart.x = -1; linkStart.y = -1;
 						if(e.mouseButton.x >= WINDOW_WIDTH+32 && e.mouseButton.x < WINDOW_WIDTH+224)
 						{
-							for(int i = 0; i<linksOnScreen.size(); i++)
+							for(unsigned int i = 0; i<linksOnScreen.size(); i++)
 							{
-								if(e.mouseButton.y >= 280+i*24 && e.mouseButton.y < 304+i*24)
+								if(e.mouseButton.y >= 280+(int)i*24 && e.mouseButton.y < 304+(int)i*24)
 								{
 									selectedLink = linksOnScreen[i];
 									break;
@@ -571,28 +571,28 @@ int main(int argc, char** argv)
 			scrollDX += (sf::Mouse::getPosition(window).x - scrollMX)/10;
 			scrollDY += (sf::Mouse::getPosition(window).y - scrollMY)/10;
 
-			xoffset = scrollSOX + scrollDX/24;
-			yoffset = scrollSOY + scrollDY/24;
+			xoffset = int(scrollSOX + scrollDX/24);
+			yoffset = int(scrollSOY + scrollDY/24);
 
 			if(xoffset < 0)
 			{
 				xoffset = 0;
-				scrollDX = (xoffset - scrollSOX)*24;
+				scrollDX = (xoffset - scrollSOX)*24.f;
 			}
 			if(xoffset >(worldWidth-1)*GRID_WIDTH)
 			{
 				xoffset = (worldWidth-1)*GRID_WIDTH;
-				scrollDX = (xoffset - scrollSOX)*24;
+				scrollDX = (xoffset - scrollSOX)*24.f;
 			}
 			if(yoffset < 0)
 			{
 				yoffset = 0;
-				scrollDY = (yoffset - scrollSOY)*24;
+				scrollDY = (yoffset - scrollSOY)*24.f;
 			}
 			if(yoffset >(worldHeight-1)*GRID_HEIGHT)
 			{
 				yoffset = (worldHeight-1)*GRID_HEIGHT;
-				scrollDY = (yoffset - scrollSOY)*24;
+				scrollDY = (yoffset - scrollSOY)*24.f;
 			}
 		}
 		/*** HANDLE PLACING BLOCKS ***/
@@ -645,7 +645,7 @@ int main(int argc, char** argv)
 			if(linkStart.x != -1 && linkStart.y != -1)
 			{
 				sf::CircleShape node(3); node.setOrigin(4, 4);
-				node.setPosition((linkStart.x-xoffset)*24+12, (linkStart.y-yoffset)*24+12);
+				node.setPosition((linkStart.x-xoffset)*24.f+12.f, (linkStart.y-yoffset)*24.f+12.f);
 				if(greenLink) node.setFillColor(sf::Color::Green);
 				else node.setFillColor(sf::Color::Red);
 				node.setOutlineThickness(1);
@@ -653,7 +653,7 @@ int main(int argc, char** argv)
 				window.draw(node);
 			}
 
-			for(int i = 0; i<links.size(); i++)
+			for(unsigned int i = 0; i<links.size(); i++)
 			{
 				Link& lnk = links[i];
 
@@ -665,10 +665,10 @@ int main(int argc, char** argv)
 
 				sf::Vertex line[2];
 
-				node.setPosition((lnk.from.x-xoffset)*24+12, (lnk.from.y-yoffset)*24+12);
+				node.setPosition((lnk.from.x-xoffset)*24.f+12.f, (lnk.from.y-yoffset)*24.f+12.f);
 				line[0] = sf::Vertex(node.getPosition(), node.getFillColor());
 				window.draw(node);
-				node.setPosition((lnk.to.x-xoffset)*24+12, (lnk.to.y-yoffset)*24+12);
+				node.setPosition((lnk.to.x-xoffset)*24.f+12.f, (lnk.to.y-yoffset)*24.f+12.f);
 				line[1] = sf::Vertex(node.getPosition(), node.getFillColor());
 				window.draw(node);
 
@@ -678,17 +678,17 @@ int main(int argc, char** argv)
 
 		/*** DRAW THE SPAWN MARKER ***/
 		sf::Text spawnMarker("S", dFont, 24);
-		spawnMarker.setPosition((spawnPoint.x - xoffset)*24+3, (spawnPoint.y - yoffset)*24-3);
+		spawnMarker.setPosition((spawnPoint.x - xoffset)*24.f+3.f, (spawnPoint.y - yoffset)*24.f-3.f);
 		window.draw(spawnMarker);
 
 		/*** DRAW WHITE BORDERS BETWEEN SCREENS ***/
 		if(!overviewMode)
 		{
 			std::vector<sf::Vertex> viewLines;
-			viewLines.push_back(sf::Vertex(sf::Vector2f(24*(GRID_WIDTH-(xoffset%GRID_WIDTH)), 0)));
-			viewLines.push_back(sf::Vertex(sf::Vector2f(24*(GRID_WIDTH-(xoffset%GRID_WIDTH)), WINDOW_HEIGHT)));
-			viewLines.push_back(sf::Vertex(sf::Vector2f(0, 24*(GRID_HEIGHT-(yoffset%GRID_HEIGHT)))));
-			viewLines.push_back(sf::Vertex(sf::Vector2f(WINDOW_WIDTH, 24*(GRID_HEIGHT-(yoffset%GRID_HEIGHT)))));
+			viewLines.push_back(sf::Vertex({ 24.f*(GRID_WIDTH-(xoffset%GRID_WIDTH)), 0 }));
+			viewLines.push_back(sf::Vertex({ 24.f*(GRID_WIDTH-(xoffset%GRID_WIDTH)), WINDOW_HEIGHT }));
+			viewLines.push_back(sf::Vertex({ 0, 24.f*(GRID_HEIGHT-(yoffset%GRID_HEIGHT)) }));
+			viewLines.push_back(sf::Vertex({ WINDOW_WIDTH, 24.f*(GRID_HEIGHT-(yoffset%GRID_HEIGHT)) }));
 			window.draw(&viewLines[0], viewLines.size(), sf::Lines);
 		}
 
@@ -706,14 +706,14 @@ int main(int argc, char** argv)
 			window.draw(tileset);
 
 			std::vector<sf::Vertex> selectionLines;
-			selectionLines.push_back(sf::Vertex(sf::Vector2f(WINDOW_WIDTH+32, 24+24*(curID/8)), sf::Color(255, 255, 255, 96)));
-			selectionLines.push_back(sf::Vertex(sf::Vector2f(WINDOW_WIDTH+224, 24+24*(curID/8)), sf::Color(255, 255, 255, 96)));
-			selectionLines.push_back(sf::Vertex(sf::Vector2f(WINDOW_WIDTH+32, 48+24*(curID/8)), sf::Color(255, 255, 255, 96)));
-			selectionLines.push_back(sf::Vertex(sf::Vector2f(WINDOW_WIDTH+224, 48+24*(curID/8)), sf::Color(255, 255, 255, 96)));
-			selectionLines.push_back(sf::Vertex(sf::Vector2f(WINDOW_WIDTH+32+24*(curID%8), 24), sf::Color(255, 255, 255, 96)));
-			selectionLines.push_back(sf::Vertex(sf::Vector2f(WINDOW_WIDTH+32+24*(curID%8), 216), sf::Color(255, 255, 255, 96)));
-			selectionLines.push_back(sf::Vertex(sf::Vector2f(WINDOW_WIDTH+56+24*(curID%8), 24), sf::Color(255, 255, 255, 96)));
-			selectionLines.push_back(sf::Vertex(sf::Vector2f(WINDOW_WIDTH+56+24*(curID%8), 216), sf::Color(255, 255, 255, 96)));
+			selectionLines.push_back(sf::Vertex({ WINDOW_WIDTH+32, 24.f+24.f*(curID/8) }, sf::Color(255, 255, 255, 96)));
+			selectionLines.push_back(sf::Vertex({ WINDOW_WIDTH+224, 24.f+24.f*(curID/8) }, sf::Color(255, 255, 255, 96)));
+			selectionLines.push_back(sf::Vertex({ WINDOW_WIDTH+32, 48.f+24.f*(curID/8) }, sf::Color(255, 255, 255, 96)));
+			selectionLines.push_back(sf::Vertex({ WINDOW_WIDTH+224, 48.f+24.f*(curID/8) }, sf::Color(255, 255, 255, 96)));
+			selectionLines.push_back(sf::Vertex({ WINDOW_WIDTH+32+24.f*(curID%8), 24 }, sf::Color(255, 255, 255, 96)));
+			selectionLines.push_back(sf::Vertex({ WINDOW_WIDTH+32+24.f*(curID%8), 216 }, sf::Color(255, 255, 255, 96)));
+			selectionLines.push_back(sf::Vertex({ WINDOW_WIDTH+56+24.f*(curID%8), 24 }, sf::Color(255, 255, 255, 96)));
+			selectionLines.push_back(sf::Vertex({ WINDOW_WIDTH+56+24.f*(curID%8), 216 }, sf::Color(255, 255, 255, 96)));
 			window.draw(&selectionLines[0], selectionLines.size(), sf::Lines);
 
 			sf::Text selectedBlockText("Selected: " + blockNames[curID], dFont, 16);
@@ -757,7 +757,7 @@ int main(int argc, char** argv)
 			window.draw(linksListText);
 
 			linksOnScreen.clear(); bool clearLinkSelection = true;
-			for(int i = 0; i<links.size(); i++)
+			for(unsigned int i = 0; i<links.size(); i++)
 			{
 				Link& lnk = links[i];
 				if((lnk.from.x >= xoffset && lnk.from.x < xoffset+GRID_WIDTH && lnk.from.y >= yoffset && lnk.from.y < yoffset+GRID_HEIGHT)
@@ -769,7 +769,7 @@ int main(int argc, char** argv)
 				}
 			}
 			if(clearLinkSelection) selectedLink = -1;
-			for(int i = 0; i<linksOnScreen.size(); i++)
+			for(unsigned int i = 0; i<linksOnScreen.size(); i++)
 			{
 				Link& lnk = links[linksOnScreen[i]];
 
@@ -778,8 +778,8 @@ int main(int argc, char** argv)
 					+ std::to_string(lnk.to.x) + ", " + std::to_string(lnk.to.y) + " (" + (lnk.onPowerOn ? "1)" : "0)");
 				sf::Text linkInfoText(linkInfoString, dFont, 16);
 				if(linksOnScreen[i] == selectedLink)
-					linkInfoText.setColor(sf::Color::Cyan);
-				linkInfoText.setPosition(WINDOW_WIDTH+32, 280+i*24);
+					linkInfoText.setFillColor(sf::Color::Cyan);
+				linkInfoText.setPosition({ WINDOW_WIDTH+32, 280.f+i*24.f });
 				window.draw(linkInfoText);
 			}
 		}
@@ -796,7 +796,7 @@ int main(int argc, char** argv)
 			sf::RectangleShape tabRect(sf::Vector2f(256/numTabs - 2, 23));
 			tabRect.setOutlineThickness(1);
 			tabRect.setFillColor(sf::Color(16+(tab==i)*48, 16+(tab==i)*48, 16+(tab==i)*48));
-			tabRect.setPosition(WINDOW_WIDTH+1+(256/numTabs)*i, WINDOW_HEIGHT-23);
+			tabRect.setPosition({ WINDOW_WIDTH+1+(float)(256/numTabs)*i, WINDOW_HEIGHT-23 });
 			window.draw(tabRect);
 
 			sf::Text tabText(tabsNames[i], dFont, 16);

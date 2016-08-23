@@ -8,25 +8,25 @@
 
 MainMenu::MainMenu(void)
 {
-	segoe = SharedRes::getFont("segoesc.ttf");
-	logoTex = SharedRes::getTexture("logo/ShapyWay.png");
-	logoGlowTex = SharedRes::getTexture("logo/ShapyWayGlow.png");
+	segoe = SharedRes::Get()->getFont("segoesc.ttf");
+	logoTex = SharedRes::Get()->getTexture("logo/ShapyWay.png");
+	logoGlowTex = SharedRes::Get()->getTexture("logo/ShapyWayGlow.png");
 
 	buttons = new Button[NUM_BUTTONS];
-	buttons[0].texture = SharedRes::getTexture("menu/buttonPlay.png");
-	buttons[1].texture = SharedRes::getTexture("menu/buttonOptions.png");
-	buttons[2].texture = SharedRes::getTexture("menu/buttonExit.png");
-	buttons[3].texture = SharedRes::getTexture("menu/buttonSkin.png");
+	buttons[0].texture = SharedRes::Get()->getTexture("menu/buttonPlay.png");
+	buttons[1].texture = SharedRes::Get()->getTexture("menu/buttonOptions.png");
+	buttons[2].texture = SharedRes::Get()->getTexture("menu/buttonExit.png");
+	buttons[3].texture = SharedRes::Get()->getTexture("menu/buttonSkin.png");
 	for(int i = 0; i < NUM_BUTTONS; i++)
 	{
 		buttons[i].texture->setSmooth(true);
 		buttons[i].sprite.setTexture(*buttons[i].texture, true);
 		buttons[i].sprite.setOrigin(40.f, 40.f);
 	}
-	buttonTex = SharedRes::getTexture("menu/button.png");
+	buttonTex = SharedRes::Get()->getTexture("menu/button.png");
 	buttonTex->setSmooth(true);
 
-	SoundSystem::playMusic("menuLoop.ogg");
+	SoundSystem::Get()->playMusic("menuLoop.ogg");
 
 	rotCount = 0;
 }
@@ -34,13 +34,13 @@ MainMenu::MainMenu(void)
 MainMenu::~MainMenu(void)
 {
 	for(int i = 0; i < NUM_BUTTONS; i++)
-		SharedRes::subtractTexture(buttons[i].texture);
+		SharedRes::Get()->subtractTexture(buttons[i].texture);
 	delete[] buttons;
 
-	SharedRes::subtractFont(segoe);
-	SharedRes::subtractTexture(logoTex);
-	SharedRes::subtractTexture(logoGlowTex);
-	SharedRes::subtractTexture(buttonTex);
+	SharedRes::Get()->subtractFont(segoe);
+	SharedRes::Get()->subtractTexture(logoTex);
+	SharedRes::Get()->subtractTexture(logoGlowTex);
+	SharedRes::Get()->subtractTexture(buttonTex);
 }
 
 void MainMenu::input(sf::Event& e)
@@ -50,8 +50,8 @@ void MainMenu::input(sf::Event& e)
 		int button = -1;
 		for(int i = 0; i < NUM_BUTTONS; i++)
 		{
-			int mx = e.mouseButton.x - buttons[i].x;
-			int my = e.mouseButton.y - buttons[i].y;
+			int mx = e.mouseButton.x - (int)buttons[i].x;
+			int my = e.mouseButton.y - (int)buttons[i].y;
 			if(mx*mx + my*my < 45*45)
 				button = i;
 		}
@@ -85,31 +85,31 @@ void MainMenu::update(sf::Vector2i mousePos)
 
 	for(int i = 0; i<NUM_BUTTONS; i++)
 	{
-		int dx = mousePos.x - buttons[i].x;
-		int dy = mousePos.y - buttons[i].y;
+		int dx = mousePos.x - (int)buttons[i].x;
+		int dy = mousePos.y - (int)buttons[i].y;
 		buttons[i].hovered = (dx*dx + dy*dy < 45*45);
 	}
 }
 
 void MainMenu::render(sf::RenderTarget* target)
 {
-	int eighth = SoundSystem::currentMusic->getDuration().asMicroseconds()/8;
+	sf::Int64 eighth = SoundSystem::Get()->currentMusic->getDuration().asMicroseconds()/8;
 	float value;
-	if((int)(SoundSystem::currentMusic->getPlayingOffset().asMicroseconds()/eighth)%2)
-		value = (float)(SoundSystem::currentMusic->getPlayingOffset().asMicroseconds()%eighth)/(float)eighth;
+	if((int)(SoundSystem::Get()->currentMusic->getPlayingOffset().asMicroseconds()/eighth)%2)
+		value = (float)(SoundSystem::Get()->currentMusic->getPlayingOffset().asMicroseconds()%eighth)/(float)eighth;
 	else
-		value = 1.f-(float)(SoundSystem::currentMusic->getPlayingOffset().asMicroseconds()%eighth)/(float)eighth;
+		value = 1.f-(float)(SoundSystem::Get()->currentMusic->getPlayingOffset().asMicroseconds()%eighth)/(float)eighth;
 
 	float opacity = ((float)rotCount)/240.f; opacity = std::min(opacity*255, 255.f);
-	buttons[0].sprite.setColor(sf::Color(value*128, 255, value*128, opacity));
-	buttons[1].sprite.setColor(sf::Color(value*128, 128+value*64, 255, opacity));
-	buttons[2].sprite.setColor(sf::Color(255, value*128, value*128, opacity));
-	buttons[3].sprite.setColor(sf::Color(255, 255, value*128, opacity));
+	buttons[0].sprite.setColor(sf::Color(sf::Uint8(value*128), 255, sf::Uint8(value*128), sf::Uint8(opacity)));
+	buttons[1].sprite.setColor(sf::Color(sf::Uint8(value*128), sf::Uint8(128+value*64), 255, sf::Uint8(opacity)));
+	buttons[2].sprite.setColor(sf::Color(255, sf::Uint8(value*128), sf::Uint8(value*128), sf::Uint8(opacity)));
+	buttons[3].sprite.setColor(sf::Color(255, 255, sf::Uint8(value*128), sf::Uint8(opacity)));
 
 	for(int i = 0; i < NUM_BUTTONS; i++)
 	{
 		if(!buttons[i].hovered)
-			buttons[i].sprite.setColor(sf::Color(255, 255, 255, opacity));
+			buttons[i].sprite.setColor(sf::Color(255, 255, 255, sf::Uint8(opacity)));
 
 		sf::Sprite border(*buttonTex);
 		border.setOrigin(50.f, 50.f);
@@ -133,21 +133,21 @@ void MainMenu::render(sf::RenderTarget* target)
 			default: break;
 			}
 
-			buttonName.setColor(sf::Color(255, 255, 255, opacity));
+			buttonName.setFillColor(sf::Color(255, 255, 255, sf::Uint8(opacity)));
 			buttonName.setPosition(WINDOW_WIDTH/2 - buttonName.getLocalBounds().width/2, WINDOW_HEIGHT/2 + 125);
 			target->draw(buttonName);
 		}
 	}
 
 	sf::Sprite logoGlow(*logoGlowTex);
-	logoGlow.setOrigin(logoGlowTex->getSize().x/2, 21);
+	logoGlow.setOrigin(logoGlowTex->getSize().x/2.f, 21);
 	logoGlow.setPosition(WINDOW_WIDTH/2, 40);
-	logoGlow.setColor(sf::Color(255, 255, 255, (1.f-value)*255*((float)opacity/255.f)));
+	logoGlow.setColor(sf::Color(255, 255, 255, sf::Uint8((1.f-value)*255*((float)opacity/255.f))));
 	target->draw(logoGlow);
 
 	sf::Sprite logo(*logoTex);
-	logo.setOrigin(logoTex->getSize().x/2, 0);
+	logo.setOrigin(logoTex->getSize().x/2.f, 0);
 	logo.setPosition(WINDOW_WIDTH/2, 40);
-	logo.setColor(sf::Color(255, 255, 255, opacity));
+	logo.setColor(sf::Color(255, 255, 255, sf::Uint8(opacity)));
 	target->draw(logo);
 }

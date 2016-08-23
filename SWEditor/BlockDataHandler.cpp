@@ -22,7 +22,7 @@ void BlockDataHandler::input(sf::Event& e)
 		if(hasOrientation)
 			orientSelector->input(e);
 	}
-	for(int i = 0; i<fields.size(); i++)
+	for(unsigned int i = 0; i<fields.size(); i++)
 		fields[i].textField.input(e);
 }
 
@@ -39,7 +39,7 @@ void BlockDataHandler::render(sf::RenderTarget* target)
 	if(hasOrientation)
 		orientSelector->render(target);
 
-	for(int i = 0; i<fields.size(); i++)
+	for(unsigned int i = 0; i<fields.size(); i++)
 	{
 		sf::Text description(fields[i].desc, *font, 16);
 		description.setPosition(WINDOW_WIDTH+32, fields[i].textField.field.getPosition().y-20);
@@ -63,7 +63,7 @@ int BlockDataHandler::getData()
 		else data += (orientSelector->value) << 8;
 	}
 
-	for(int i = 0; i<fields.size(); i++)
+	for(unsigned int i = 0; i<fields.size(); i++)
 	{
 		int num = Util::clamp(std::stoi(fields[i].textField.text), fields[i].min, fields[i].max);
 		data += num << fields[i].bitOffset;
@@ -81,9 +81,9 @@ void BlockDataHandler::setData(int data)
 		else orientSelector->value = (data & 768) >> 8;
 	}
 
-	for(int i = 0; i<fields.size(); i++)
+	for(unsigned int i = 0; i<fields.size(); i++)
 	{
-		int mask = 0; mask = pow(2, fields[i].bitLength)-1;
+		int mask = 0; mask = (int)pow(2, fields[i].bitLength)-1;
 		mask = mask << fields[i].bitOffset;
 		int value = (data & mask) >> fields[i].bitOffset;
 

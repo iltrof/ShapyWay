@@ -6,17 +6,19 @@
 
 namespace WorldRenderer
 {
-	sf::RenderTexture depthLayers[NUM_DEPTH_LAYERS];
+	sf::RenderTexture* depthLayers;
 	int lastOverviewWidth;
 	int lastOverviewHeight;
-	sf::RenderTexture overviewTexture;
+	sf::RenderTexture* overviewTexture;
 
 	void init()
 	{
+		depthLayers = new sf::RenderTexture[NUM_DEPTH_LAYERS];
 		for(int i = 0; i<NUM_DEPTH_LAYERS; i++)
 			depthLayers[i].create(GRID_WIDTH*24, GRID_HEIGHT*24);
 		lastOverviewWidth = 0;
 		lastOverviewHeight = 0;
+		overviewTexture = new sf::RenderTexture;
 	}
 
 	void render(Block* blocks, int width, int height, int xoffset, int yoffset, sf::Texture* textures, sf::RenderWindow* window, std::vector<vec2i>& interscreenBlocks)
@@ -60,7 +62,7 @@ namespace WorldRenderer
 	void renderOverview(Block* blocks, int width, int height, int spawnx, int spawny, sf::RenderWindow* window)
 	{
 		if(lastOverviewWidth != width || lastOverviewHeight != height)
-			overviewTexture.create(width*GRID_WIDTH, height*GRID_HEIGHT);
+			overviewTexture->create(width*GRID_WIDTH, height*GRID_HEIGHT);
 		lastOverviewWidth = width; lastOverviewHeight = height;
 
 		std::vector<sf::Vertex> overview;
@@ -69,7 +71,7 @@ namespace WorldRenderer
 		{
 			for(int j = height*GRID_HEIGHT-1; j>=0; j--)
 			{
-				sf::Vertex pt(sf::Vector2f(i, j));
+				sf::Vertex pt({ (float)i, (float)j });
 				switch(blocks[j*width*GRID_WIDTH + i].ID)
 				{
 				case ID_GRASS: 
@@ -100,11 +102,11 @@ namespace WorldRenderer
 					overview.push_back(pt);
 			}
 		}
-		overview.push_back(sf::Vertex(sf::Vector2f(spawnx, spawny), sf::Color::White));
+		overview.push_back(sf::Vertex({ (float)spawnx, (float)spawny }, sf::Color::White));
 
-		overviewTexture.draw(&overview[0], overview.size(), sf::Points);
+		overviewTexture->draw(&overview[0], overview.size(), sf::Points);
 
-		sf::Sprite ov(overviewTexture.getTexture());
+		sf::Sprite ov(overviewTexture->getTexture());
 		float scale = std::min(24.f/width, 24.f/height);
 		ov.setScale(scale, -scale);
 		ov.setPosition(0, WINDOW_HEIGHT);

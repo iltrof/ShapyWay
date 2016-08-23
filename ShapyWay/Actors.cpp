@@ -3,15 +3,15 @@
 
 Player::Player(int X, int Y)
 {
-	x = X; y = Y; xspeed = 0; yspeed = 0; state = 0;
-	texture = SharedRes::getTexture("player/playerWalk.png");
+	x = (float)X; y = (float)Y; xspeed = 0; yspeed = 0; state = 0;
+	texture = SharedRes::Get()->getTexture("player/playerWalk.png");
 	texture->setSmooth(true);
 	collisionRect = sf::FloatRect(-8, -16, 16, 16);
 }
 
 Player::~Player(void)
 {
-	SharedRes::subtractTexture(texture);
+	SharedRes::Get()->subtractTexture(texture);
 }
 
 void Player::render(sf::RenderTarget* target)

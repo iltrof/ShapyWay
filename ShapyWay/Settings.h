@@ -1,9 +1,20 @@
 #pragma once
 
-static struct Settings
+class Settings
 {
-	static float soundVolume; //Sound volume (0-100)
-	static float musicVolume; //Music volume (0-100)
+public:
+	~Settings() { instance = nullptr; }
+
+	static Settings* Get() 
+	{
+		if (instance == nullptr)
+			instance = new Settings;
+		return instance;
+	}
+
+	float soundVolume; //Sound volume (0-100)
+	float musicVolume; //Music volume (0-100)
 private:
-	Settings();
+	Settings() {}
+	static Settings* instance;
 };

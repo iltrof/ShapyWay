@@ -11,8 +11,8 @@
 
 void Level::loadMap(std::string mapName)
 {
-	delete[] blocks; for(int i = 0; i<actors.size(); i++) delete actors[i]; actors.clear();
-	std::ifstream file; file.open(SharedRes::programDirectory+mapName);
+	delete[] blocks; for(unsigned int i = 0; i<actors.size(); i++) delete actors[i]; actors.clear();
+	std::ifstream file; file.open(SharedRes::Get()->programDirectory+mapName);
 	std::string mapVersion;
 	file >> mapVersion;
 	file >> width >> height;
@@ -62,19 +62,19 @@ void Level::loadMap(std::string mapName)
 
 Level::Level(std::string mapName)
 {
-	SoundSystem::stopMusic();
+	SoundSystem::Get()->stopMusic();
 
 	textures[TILEID_AIR] = NULL;
-	textures[TILEID_GRASS] = SharedRes::getTexture("tiles/grass.png");
-	textures[TILEID_LASER] = SharedRes::getTexture("tiles/laser.png");
-	textures[TILEID_LEVER] = SharedRes::getTexture("tiles/lever.png");
-	textures[TILEID_WATER] = SharedRes::getTexture("tiles/water.png");
-	textures[TILEID_LAVA] = SharedRes::getTexture("tiles/lava.png");
-	textures[TILEID_ACID] = SharedRes::getTexture("tiles/acid.png");
-	textures[TILEID_BUTTON] = SharedRes::getTexture("tiles/press.png");
-	textures[TILEID_PORTAL] = SharedRes::getTexture("tiles/portal.png");
-	textures[TILEID_LIGHT] = SharedRes::getTexture("tiles/light.png");
-	textures[TILEID_CHECKPOINT] = SharedRes::getTexture("tiles/checkpoint.png");
+	textures[TILEID_GRASS] = SharedRes::Get()->getTexture("tiles/grass.png");
+	textures[TILEID_LASER] = SharedRes::Get()->getTexture("tiles/laser.png");
+	textures[TILEID_LEVER] = SharedRes::Get()->getTexture("tiles/lever.png");
+	textures[TILEID_WATER] = SharedRes::Get()->getTexture("tiles/water.png");
+	textures[TILEID_LAVA] = SharedRes::Get()->getTexture("tiles/lava.png");
+	textures[TILEID_ACID] = SharedRes::Get()->getTexture("tiles/acid.png");
+	textures[TILEID_BUTTON] = SharedRes::Get()->getTexture("tiles/press.png");
+	textures[TILEID_PORTAL] = SharedRes::Get()->getTexture("tiles/portal.png");
+	textures[TILEID_LIGHT] = SharedRes::Get()->getTexture("tiles/light.png");
+	textures[TILEID_CHECKPOINT] = SharedRes::Get()->getTexture("tiles/checkpoint.png");
 
 	blocks = NULL; player = NULL;
 	this->mapName = mapName;
@@ -91,8 +91,8 @@ Level::~Level()
 {
 	delete[] blocks;
 	for(auto tex : textures)
-		SharedRes::subtractTexture(tex.second);
-	for(int i = 0; i<actors.size(); i++)
+		SharedRes::Get()->subtractTexture(tex.second);
+	for(unsigned int i = 0; i<actors.size(); i++)
 		delete actors[i];
 
 	delete[] depthLayers;
@@ -103,7 +103,7 @@ Level::~Level()
 void Level::update(sf::Vector2i mousePos)
 {
 	float playerXspeed;
-	playerXspeed = 4*((isPressed(D)||isPressed(Right))-(isPressed(A)||isPressed(Left)));
+	playerXspeed = 4.f*((isPressed(D)||isPressed(Right))-(isPressed(A)||isPressed(Left)));
 	if(player->xspeed >= -4 && player->xspeed <= 4) player->xspeed = playerXspeed;
 
 	if(isPressed(W)||isPressed(Space)||isPressed(Up))
@@ -127,7 +127,7 @@ void Level::update(sf::Vector2i mousePos)
 				player->yspeed = 1;
 	}
 
-	for(int i = 0; i<actors.size(); i++)
+	for(unsigned int i = 0; i<actors.size(); i++)
 		Physics::updateActor(actors[i], blocks, width, height, links);
 }
 
@@ -141,7 +141,7 @@ void Level::input(sf::Event& e)
 			Notifications::queue.push(notifGOTO_MAIN_MENU);
 			break;
 		case sf::Keyboard::E:
-			SharedUtil::interactWithBlock(blocks, player->x/24, (player->y-8)/24, width, height, links);
+			SharedUtil::interactWithBlock(blocks, (int)(player->x/24.f), int((player->y-8.f)/24.f), width, height, links);
 			break;
 		case sf::Keyboard::P:
 			Notifications::queue.push(notifPAUSE);
@@ -154,17 +154,17 @@ void Level::render(sf::RenderTarget* target)
 {
 	std::vector<sf::Vertex> vv;
 	vv.push_back(sf::Vertex(sf::Vector2f(0, 0), sf::Color(10,32,48)));
-	vv.push_back(sf::Vertex(sf::Vector2f(target->getSize().x, 0), sf::Color(10,32,48)));
-	vv.push_back(sf::Vertex(sf::Vector2f(target->getSize().x, target->getSize().y), sf::Color(10, 10, 32)));
-	vv.push_back(sf::Vertex(sf::Vector2f(0, target->getSize().y), sf::Color(10, 10, 32)));
+	vv.push_back(sf::Vertex(sf::Vector2f((float)target->getSize().x, 0), sf::Color(10,32,48)));
+	vv.push_back(sf::Vertex(sf::Vector2f((float)target->getSize().x, (float)target->getSize().y), sf::Color(10, 10, 32)));
+	vv.push_back(sf::Vertex(sf::Vector2f(0, (float)target->getSize().y), sf::Color(10, 10, 32)));
 	target->draw(&vv[0],4,sf::Quads);
 	
-	for(int i = 0; i<actors.size(); i++)
+	for(unsigned int i = 0; i<actors.size(); i++)
 	{
 		actors[i]->render(target);
 	}
 
-	int screenX = player->x / WINDOW_WIDTH, screenY = (player->y-8) / WINDOW_HEIGHT;
+	int screenX = int(player->x / WINDOW_WIDTH), screenY = int((player->y-8) / WINDOW_HEIGHT);
 
 	for(int i = 0; i<NUM_DEPTH_LAYERS; i++)
 		depthLayers[i].clear(sf::Color::Transparent);
@@ -204,8 +204,8 @@ void Level::handleNotification()
 {
 	if(Notifications::queue.front() == notifON_PLAYER_DEATH)
 	{
-		player->x = spawnPointX*24+12;
-		player->y = spawnPointY*24+24;
+		player->x = spawnPointX*24.f+12.f;
+		player->y = spawnPointY*24.f+24.f;
 		player->xspeed = 0;
 		player->yspeed = 0;
 		player->state = 0;

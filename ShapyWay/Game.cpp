@@ -24,9 +24,9 @@ void Game::start(int fps)
 	if(fps!=-1) window->setFramerateLimit(fps);
 	isRunning = true; hasFocus = true; autoPause = false;
 
-	Settings::musicVolume = 100;
-	Settings::soundVolume = 100;
-	SoundSystem::init();
+	Settings::Get()->musicVolume = 100;
+	Settings::Get()->soundVolume = 100;
+	SoundSystem::Get()->init();
 
 	scenes.push_back(new MainMenu());
 
@@ -100,7 +100,7 @@ void Game::update()
 		case notifGOTO_SKIN_EDITOR:
 			delete scenes.back();
 			scenes.pop_back();
-			scenes.push_back(new SkinEditor(SharedRes::programDirectory + "res/graphics/player/playerWalk.png"));
+			scenes.push_back(new SkinEditor(SharedRes::Get()->programDirectory + "res/graphics/player/playerWalk.png"));
 			autoPause = false;
 			break;
 		case notifPOP_SCENE:
@@ -111,7 +111,7 @@ void Game::update()
 			((Level*)scenes.back())->handleNotification();
 			break;
 		case notifUPDATE_SETTINGS:
-			SoundSystem::setMusicVolume(Settings::musicVolume);
+			SoundSystem::Get()->setMusicVolume((int)Settings::Get()->musicVolume);
 			break;
 		case notifPAUSE:
 			scenes.push_back(new PauseMenu());
@@ -135,15 +135,15 @@ void Game::render()
 	if(scenes.size()>1)
 	{
 		blurred->clear();
-		for(int i = 0; i<scenes.size()-1; i++)
+		for(unsigned int i = 0; i<scenes.size()-1; i++)
 			scenes[i]->render(blurred);
 		blurred->display();
 
 		sf::Sprite blur(blurred->getTexture());
-		SharedRes::blurShader.setParameter("texture", sf::Shader::CurrentTexture);
-		SharedRes::blurShader.setParameter("radius", 2);
-		SharedRes::blurShader.setParameter("dimensions", sf::Vector2f(window->getSize()));
-		window->draw(blur, &SharedRes::blurShader);
+		SharedRes::Get()->blurShader.setUniform("texture", sf::Shader::CurrentTexture);
+		SharedRes::Get()->blurShader.setUniform("radius", 2);
+		SharedRes::Get()->blurShader.setUniform("dimensions", sf::Vector2f(window->getSize()));
+		window->draw(blur, &SharedRes::Get()->blurShader);
 	}
 
 	scenes.back()->render(window);
