@@ -1,0 +1,19 @@
+ID	NAME			DATA					DESCRIPTION
+
+0	AIR				........ ........		
+1	GRASS			........ ........
+2	LASER			........ ....LPOO		L: whether links are ORed; P: powered; O: orientation;
+3	LEVER			.......P CCCCCCCC		P: powering; C: color;
+4	WATER			........ ........
+5	BUTTON			.......P CCCCCCCC		P: powering; C: color;
+6	PORTAL			........ CCCCCCCC		C: color;
+7	LIGHT			LPRRRROO CCCCCCCC		L: whether links are ORed; P: powered; R: radius (x24); O: orientation; C: color;
+8	CHECKPOINT		.......R CCCCCCCC		R: raised; C: color;
+
+=====
+
+ORIENTATIONS:
+00: UP
+01: RIGHT
+10: DOWN
+11: LEFT
